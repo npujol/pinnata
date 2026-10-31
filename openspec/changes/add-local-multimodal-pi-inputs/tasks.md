@@ -2,13 +2,13 @@
 
 ## 1. Pi Pocket foundation
 
-- [ ] 1.1 Scaffold the TypeScript Pi Pocket client and verify its development and production builds.
-- [ ] 1.2 Add local configuration for the llama-swap base URL and verify startup fails visibly when the local endpoint is unavailable.
+- [x] 1.1 Scaffold the TypeScript Pi Pocket client and verify its development and production builds.
+- [x] 1.2 Add local configuration for the llama-swap base URL and verify startup fails visibly when the local endpoint is unavailable.
 
 ## 2. Local model routing
 
-- [ ] 2.1 Implement model discovery, capability metadata, and per-conversation selection for `lfm3-audio`, `lfm3-text`, `lfm3-vl`, `lfm3-omni`, and `qwen3.6`; verify model-list and selection tests.
-- [ ] 2.2 Route requests only to the selected local model and document configuration; verify no remote fallback on connection errors.
+- [x] 2.1 Implement model discovery, capability metadata, and per-conversation selection for `lfm3-audio`, `lfm3-text`, `lfm3-vl`, `lfm3-omni`, and `qwen3.6`; verify model-list and selection tests.
+- [x] 2.2 Route requests only to the selected local model and document configuration; verify no remote fallback on connection errors.
 
 ## 3. Image input
 
