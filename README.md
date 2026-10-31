@@ -25,7 +25,7 @@ Build those assets locally with `npm run build:release`. The archive contains `d
 
 ### Nix release channel
 
-The release workflow promotes the latest stable `vX.Y.Z` tag reachable from `main` to the `nix-release` branch using a fast-forward-only push. Nix consumers can track that release source as a non-flake input:
+The release workflow promotes the latest stable `vX.Y.Z` tag reachable from `main` to the `nix-release` branch using a fast-forward-only ref update. Nix consumers can track that release source as a non-flake input:
 
 ```nix
 inputs.pinnata = {

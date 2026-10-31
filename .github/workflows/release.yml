@@ -43,9 +43,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Promote latest release tag for Nix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          git fetch origin --tags --quiet
           release_tag=""
           while IFS= read -r candidate; do
             if [[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -58,4 +59,15 @@ jobs:
             exit 1
           fi
           release_commit="$(git rev-parse "${release_tag}^{commit}")"
-          git push origin "${release_commit}:refs/heads/nix-release"
+          ref_endpoint="repos/${GITHUB_REPOSITORY}/git/ref/heads/nix-release"
+          if current_commit="$(gh api "$ref_endpoint" --jq '.object.sha' 2>/dev/null)"; then
+            if ! git merge-base --is-ancestor "$current_commit" "$release_commit"; then
+              echo "::error::Refusing to move nix-release backwards or across histories"
+              exit 1
+            fi
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/git/refs/heads/nix-release" \
+              -f sha="$release_commit" -F force=false >/dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+              -f ref=refs/heads/nix-release -f sha="$release_commit" >/dev/null
+          fi
