@@ -17,6 +17,10 @@ npm run dev
 
 Production build: `npm run build`; tests: `npm test`.
 
+## Releases
+
+GitHub Actions runs tests/build on pushes to `main`, then semantic-release analyzes Conventional Commits and creates a GitHub release with a `vX.Y.Z` tag. The app is private and is not published to npm. Preview the next release locally with `npm run release:dry-run` (requires `GITHUB_TOKEN` for a complete GitHub integration run).
+
 The development server proxies the same-origin `/router` path to `http://127.0.0.1:8090` to avoid browser CORS issues. Production deployments must provide an equivalent same-origin reverse proxy. Set `VITE_LLAMA_SWAP_URL` at build/dev-server startup only when the chosen endpoint permits browser CORS. The model menu is discovered from `/v1/models`. Known capability metadata is explicit: `lfm3-audio` (transcription/speech), `lfm3-text` (text), `lfm3-vl` (images), `lfm3-omni` (images/audio/live), and `qwen3.6` (images). Unknown IDs are conservatively treated as text-only.
 
 Conversations and confirmed image attachments are stored in browser IndexedDB. Delete a conversation to remove its stored images. Microphone recordings are held temporarily in memory, sent to local `/v1/audio/transcriptions` using `lfm3-audio`, and discarded after transcription; only transcript text is added to the conversation.
@@ -28,9 +32,9 @@ Images accept JPEG, PNG, and WebP. Image-bearing requests are rejected unless th
 Live voice is a separate direct `llama-server` WebSocket path (`lfm3-omni`), not routed through llama-swap. Start the included localhost runtime host in a second terminal:
 
 ```sh
-LLAMA_SERVER_BIN=/path/to/llama-server \\
-LLAMA_SERVER_MODEL=/path/to/LFM3-Omni.gguf \\
+LLAMA_SERVER_BIN=/path/to/llama-server \
+LLAMA_SERVER_MODEL=/path/to/LFM3-Omni.gguf \
 npm run runtime-host
 ```
 
-The host checks the binary version, starts/stops a dedicated server on `127.0.0.1:8092`, exposes its lifecycle API on `127.0.0.1:8091`, and proxies the realtime WebSocket. It only accepts browser requests from `http://127.0.0.1:5173` by default; set `PI_POCKET_ALLOWED_ORIGIN` to the exact origin serving the client when needed. Optional server arguments can be passed as a JSON string in `LLAMA_SERVER_ARGS`. The runtime must be llama.cpp b11960 or newer. Upgrade/configure llama.cpp separately; this repo does not alter nix-darwin settings.
+The host checks the binary version, starts/stops a dedicated server on `127.0.0.1:8092`, exposes its lifecycle API on `127.0.0.1:8093`, and proxies the realtime WebSocket. It only accepts browser requests from `http://127.0.0.1:5173` by default; set `PI_POCKET_ALLOWED_ORIGIN` to the exact origin serving the client when needed. Optional server arguments can be passed as a JSON string in `LLAMA_SERVER_ARGS`. The runtime must be llama.cpp b11960 or newer. Upgrade/configure llama.cpp separately; this repo does not alter nix-darwin settings.

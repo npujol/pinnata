@@ -4,7 +4,7 @@ import { once } from 'node:events';
 import { WebSocket, WebSocketServer } from 'ws';
 
 const host = '127.0.0.1';
-const port = Number(process.env.PI_POCKET_CONTROL_PORT ?? 8091);
+const port = Number(process.env.PI_POCKET_CONTROL_PORT ?? 8093);
 const upstreamPort = Number(process.env.PI_POCKET_LLAMA_PORT ?? 8092);
 const allowedOrigin = process.env.PI_POCKET_ALLOWED_ORIGIN ?? 'http://127.0.0.1:5173';
 const binary = process.env.LLAMA_SERVER_BIN;

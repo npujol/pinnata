@@ -9,7 +9,9 @@ export class LiveVoiceSession {
   private stream?: MediaStream;
   private audioContext?: AudioContext;
   private processor?: ScriptProcessorNode;
-  async start(onMessage: (data: MessageEvent) => void, controlUrl = 'http://127.0.0.1:8091'): Promise<void> {
+  private controlUrl = 'http://127.0.0.1:8093';
+  async start(onMessage: (data: MessageEvent) => void, controlUrl = this.controlUrl): Promise<void> {
+    this.controlUrl = controlUrl;
     let response: Response;
     try { response = await fetch(`${controlUrl}/start`, { method: 'POST' }); }
     catch { throw new Error('Live voice unavailable: local llama-server runtime host is not running.'); }
@@ -44,6 +46,6 @@ export class LiveVoiceSession {
     this.audioContext?.close(); this.audioContext = undefined;
     this.stream?.getTracks().forEach(track => track.stop()); this.stream = undefined;
     this.socket?.close(); this.socket = undefined;
-    void fetch('http://127.0.0.1:8091/stop', { method: 'POST' }).catch(() => undefined);
+    void fetch(`${this.controlUrl}/stop`, { method: 'POST' }).catch(() => undefined);
   }
 }

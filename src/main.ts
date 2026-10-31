@@ -52,7 +52,7 @@ async function render(): Promise<void> {
           }
           if (data.type === 'response.done' && liveText) { current.messages.push({ id: id(), role: 'assistant', text: liveText }); void persist().then(render); liveText = ''; }
         } catch { status('Received an unreadable live voice event.', true); }
-      }, 'http://127.0.0.1:8091');
+      }, 'http://127.0.0.1:8093');
       liveActive = true; button.textContent = 'Stop live voice'; status('Live voice connected');
     } catch (err) { status(String(err), true); }
   });
