@@ -6,8 +6,10 @@ import { LiveVoiceSession } from './live-voice';
 import './style.css';
 
 const api = new LocalApi(); const ptt = new PushToTalk(); const live = new LiveVoiceSession();
+window.addEventListener('pagehide', () => live.stop());
 const root = document.querySelector<HTMLDivElement>('#app')!;
 let conversations: Conversation[] = []; let current: Conversation; let models: string[] = []; let images: string[] = [];
+let liveActive = false; let liveText = ''; let liveOutputContext: AudioContext | undefined; let livePlaybackTime = 0;
 const id = () => crypto.randomUUID();
 function newConversation(): Conversation { return { id: id(), title: 'New conversation', model: models[0] ?? 'lfm3-text', messages: [] }; }
 function escapeHtml(s: string): string { return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!); }
@@ -26,12 +28,34 @@ async function render(): Promise<void> {
   document.querySelector('#camera')!.addEventListener('click', async () => { try { images.push(await saveImage(await captureImage())); await render(); } catch (err) { status(String(err), true); } });
   document.querySelectorAll<HTMLButtonElement>('[data-remove]').forEach(b => b.onclick = async () => { const key = b.dataset.remove!; images = images.filter(i => i !== key); await removeImages([key]); await render(); });
   const recordButton = document.querySelector<HTMLButtonElement>('#record')!;
-  recordButton.onpointerdown = async e => { e.preventDefault(); try { await ptt.start(); recordButton.textContent = 'Release to transcribe'; } catch (err) { status(String(err), true); } };
+  recordButton.onpointerdown = async e => { e.preventDefault(); recordButton.setPointerCapture(e.pointerId); try { await ptt.start(); recordButton.textContent = 'Release to transcribe'; } catch (err) { status(String(err), true); } };
   const finishRecording = async () => { try { const blob = await ptt.stop(); const text = await api.transcribe(blob); await submit(text); } catch (err) { ptt.cancel(); status(String(err), true); } finally { recordButton.textContent = 'Hold to record'; } };
   recordButton.onpointerup = finishRecording; recordButton.onpointercancel = () => { ptt.cancel(); recordButton.textContent = 'Hold to record'; status('Recording cancelled'); };
   document.querySelector('#send')!.addEventListener('click', async () => { const field = document.querySelector<HTMLTextAreaElement>('#prompt')!; await submit(field.value); });
   document.querySelector<HTMLInputElement>('#spoken')!.onchange = () => { if (document.querySelector<HTMLInputElement>('#spoken')!.checked && !capabilitiesFor(current.model).speech) status('This model does not advertise speech output.', true); };
-  document.querySelector('#live')!.addEventListener('click', async () => { try { await live.start(() => {}, 'http://127.0.0.1:8091'); status('Connected to local live voice. Use Stop to end.'); } catch (err) { status(String(err), true); } });
+  document.querySelector('#live')!.addEventListener('click', async () => {
+    const button = document.querySelector<HTMLButtonElement>('#live')!;
+    if (liveActive) { live.stop(); liveActive = false; liveOutputContext?.close(); liveOutputContext = undefined; button.textContent = 'Live voice'; status('Live voice stopped'); return; }
+    liveText = ''; livePlaybackTime = 0;
+    try {
+      await live.start(event => {
+        try {
+          const data = JSON.parse(String(event.data)) as { type?: string; delta?: string; audio?: string; transcript?: string };
+          if (data.type === 'response.text.delta' || data.type === 'response.audio_transcript.delta') liveText += data.delta ?? '';
+          if (data.type?.includes('audio.delta') && data.delta) {
+            liveOutputContext ??= new AudioContext({ sampleRate: 24000 });
+            const bytes = Uint8Array.from(atob(data.delta), c => c.charCodeAt(0)); const samples = new Int16Array(bytes.buffer);
+            const buffer = liveOutputContext.createBuffer(1, samples.length, 24000); const channel = buffer.getChannelData(0);
+            for (let i = 0; i < samples.length; i++) channel[i] = samples[i] / 32768;
+            const source = liveOutputContext.createBufferSource(); source.buffer = buffer; source.connect(liveOutputContext.destination);
+            livePlaybackTime = Math.max(livePlaybackTime, liveOutputContext.currentTime); source.start(livePlaybackTime); livePlaybackTime += buffer.duration;
+          }
+          if (data.type === 'response.done' && liveText) { current.messages.push({ id: id(), role: 'assistant', text: liveText }); void persist().then(render); liveText = ''; }
+        } catch { status('Received an unreadable live voice event.', true); }
+      }, 'http://127.0.0.1:8091');
+      liveActive = true; button.textContent = 'Stop live voice'; status('Live voice connected');
+    } catch (err) { status(String(err), true); }
+  });
   document.querySelector('#delete')!.addEventListener('click', async () => { const keys = current.messages.flatMap(m => m.images ?? []); await removeImages([...keys, ...images]); await deleteConversation(current.id); conversations = conversations.filter(c => c.id !== current.id); current = conversations[0] ?? newConversation(); if (!conversations.length) conversations.push(current); images = []; await persist(); await render(); });
 }
 async function persist(): Promise<void> { for (const conversation of conversations) await saveConversation(conversation); }

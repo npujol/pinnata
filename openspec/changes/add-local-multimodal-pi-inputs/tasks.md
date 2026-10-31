@@ -12,18 +12,18 @@
 
 ## 3. Image input
 
-- [ ] 3.1 Implement camera capture and JPEG/PNG/WebP file selection with permission and unsupported-format states; verify browser tests.
-- [ ] 3.2 Persist image attachments with durable conversation references and route them to vision-capable models; verify restore, deletion, and image-request tests.
+- [x] 3.1 Implement camera capture and JPEG/PNG/WebP file selection with permission and unsupported-format states; verify browser tests.
+- [x] 3.2 Persist image attachments with durable conversation references and route them to vision-capable models; verify restore, deletion, and image-request tests.
 
 ## 4. Push-to-talk transcription
 
-- [ ] 4.1 Implement browser microphone capture and push-to-talk controls; verify permission-denied, cancel, and completed-recording tests.
-- [ ] 4.2 Submit recordings to local `/v1/audio/transcriptions` with `lfm3-audio`, commit transcript text as a conversation submission, and delete audio on success/failure/cancel; verify cleanup and transcription tests.
+- [x] 4.1 Implement browser microphone capture and push-to-talk controls; verify permission-denied, cancel, and completed-recording tests.
+- [x] 4.2 Submit recordings to local `/v1/audio/transcriptions` with `lfm3-audio`, commit transcript text as a conversation submission, and delete audio on success/failure/cancel; verify cleanup and transcription tests.
 
 ## 5. Live voice and speech output
 
-- [ ] 5.1 Implement a separately managed direct `llama-server` WebSocket session for LFM3-Omni, gated on llama.cpp b11960 or newer; verify start, stream, stop, and unavailable-runtime tests.
-- [ ] 5.2 Add separate text and spoken-response choices and verify spoken output or an explicit unsupported/error state; document live mode's direct-server routing.
+- [x] 5.1 Implement a separately managed direct `llama-server` WebSocket session for LFM3-Omni, gated on llama.cpp b11960 or newer; verify start, stream, stop, and unavailable-runtime tests.
+- [x] 5.2 Add separate text and spoken-response choices and verify spoken output or an explicit unsupported/error state; document live mode's direct-server routing.
 
 ## 6. Integration verification
 

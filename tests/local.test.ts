@@ -20,6 +20,12 @@ describe('local model routing', () => {
     const api = new LocalApi('http://localhost:8090', vi.fn().mockRejectedValue(new TypeError('offline')));
     await expect(api.models()).rejects.toThrow('No remote fallback');
   });
+  it('requests spoken output explicitly when selected', async () => {
+    const request = vi.fn().mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: 'hello', audio: { data: 'YQ==' } } }] })));
+    const api = new LocalApi('http://localhost:8090', request);
+    expect(await api.chat('lfm3-audio', [], true)).toEqual({ text: 'hello', audio: 'YQ==' });
+    expect(JSON.parse(request.mock.calls[0][1]!.body as string)).toMatchObject({ modalities: ['text', 'audio'], audio: { voice: 'alloy', format: 'wav' } });
+  });
 });
 
 describe('realtime runtime gate', () => {
