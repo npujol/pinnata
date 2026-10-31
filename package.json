@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
+    "build:release": "npm run build && node tools/package-release.mjs",
     "test": "vitest run",
     "runtime-host": "tsx tools/runtime-host.ts",
     "release": "semantic-release",
@@ -15,6 +16,7 @@
     "@semantic-release/github": "^12.0.10",
     "@types/node": "22.10.2",
     "@types/ws": "^8.18.2",
+    "esbuild": "^0.28.2",
     "semantic-release": "^25.0.9",
     "tsx": "^4.23.15",
     "typescript": "5.9.3",

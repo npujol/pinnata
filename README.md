@@ -19,7 +19,9 @@ Production build: `npm run build`; tests: `npm test`.
 
 ## Releases
 
-GitHub Actions runs tests/build on pushes to `main`, then semantic-release analyzes Conventional Commits and creates a GitHub release with a `vX.Y.Z` tag. The app is private and is not published to npm. Preview the next release locally with `npm run release:dry-run` (requires `GITHUB_TOKEN` for a complete GitHub integration run).
+GitHub Actions runs tests/build on pushes to `main`, then semantic-release analyzes Conventional Commits and creates a GitHub release with a `vX.Y.Z` tag. Each release includes `pinnata-pi-pocket-prebuilt.tar.gz` (built frontend and bundled CommonJS runtime host) plus a SHA-256 checksum. Nix expressions can fetch and unpack these assets without building the project. The app is private and is not published to npm. Preview the next release locally with `npm run release:dry-run` (requires `GITHUB_TOKEN` for a complete GitHub integration run).
+
+Build those assets locally with `npm run build:release`. The archive contains `dist/`, bundled `runtime-host.cjs`, this README, and the license.
 
 The development server proxies the same-origin `/router` path to `http://127.0.0.1:8090` to avoid browser CORS issues. Production deployments must provide an equivalent same-origin reverse proxy. Set `VITE_LLAMA_SWAP_URL` at build/dev-server startup only when the chosen endpoint permits browser CORS. The model menu is discovered from `/v1/models`. Known capability metadata is explicit: `lfm3-audio` (transcription/speech), `lfm3-text` (text), `lfm3-vl` (images), `lfm3-omni` (images/audio/live), and `qwen3.6` (images). Unknown IDs are conservatively treated as text-only.
 

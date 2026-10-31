@@ -4,6 +4,20 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "release-artifacts/pinnata-pi-pocket-prebuilt.tar.gz",
+            "label": "Prebuilt Pi Pocket bundle"
+          },
+          {
+            "path": "release-artifacts/pinnata-pi-pocket-prebuilt.tar.gz.sha256",
+            "label": "SHA-256 checksum"
+          }
+        ]
+      }
+    ]
   ]
 }
